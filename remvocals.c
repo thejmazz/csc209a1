@@ -2,14 +2,6 @@
 
 int main (int argc, char **argv ) {
 
-	// Print number of command line arguments
-	printf("%d command line argument(s). They are: \n", argc);
-	// Print value of command line arguments
-	int i;
-	for(i = 0; i < argc; i++) {
-		printf("%d: %s\n",i,argv[i]);
-	}
-
 	// Check for proper number of command line arguments
 	if (argc != 3){
 		fprintf(stderr, "Usage: %s <sourcewav> <destwav> \n", argv[0]);
@@ -28,18 +20,19 @@ int main (int argc, char **argv ) {
 		return 1;
 	}
 
-	short n;
-	fread(&n, sizeof(short), 1, fp_love);
-	//printf("my first short: %d\n", *n);
-
 	// Pointer to output file
 	FILE *fp_output;
 
 	// Open the output file in 'write binary' mode
 	fp_output = fopen(argv[2], "wb");
 
-	// Write to output file
-	fwrite(&n, sizeof(n), 1, fp_output);
+
+	short *n;
+	int i;
+	for(i = 0; i < 22; i++){
+		fread(&n, sizeof(short), 1, fp_love);
+		fwrite(&n, sizeof(short), 1, fp_output);
+	}
 
 	return 0;
 }
