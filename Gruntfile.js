@@ -15,7 +15,7 @@ module.exports = function(grunt) {
             },
             remvocals : {
                cmd: function() {
-                    return './bin/remvocals sdsd sdsd';
+                    return './bin/remvocals src-audio/love.wav output/love-no-vocals.wav';
                 } 
             }
         }
