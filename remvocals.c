@@ -27,7 +27,7 @@ int main (int argc, char **argv ) {
 	fp_output = fopen(argv[2], "wb");
 
 	// Declare pointers to shorts
-	short *s1, *s2;
+	short s1, s2;
 
 	// Write header to output, short by short
 	int i;
@@ -36,18 +36,15 @@ int main (int argc, char **argv ) {
 		fwrite(&s1, sizeof(short), 1, fp_output);
 	}
 
-	//short new;
-	for(i = 0; i < 2; i++) {
-		fread(&s1, sizeof(short), 1, fp_love);
-		fread(&s2, sizeof(short), 1, fp_love);
-	}
-
 	int j = 1;
+	short combined;
 	while (j == 1){
 		// Read in a pair of shorts
 		j = fread(&s1, sizeof(short), 1, fp_love);
 		j = fread(&s2, sizeof(short), 1, fp_love);
 		
+		//combined = (s1 + s2) / 2;
+
 		// Write pair of shorts
 		fwrite(&s1, sizeof(short), 1, fp_output);
 		fwrite(&s2, sizeof(short), 1, fp_output);
