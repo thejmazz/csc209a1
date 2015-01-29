@@ -3,19 +3,21 @@ module.exports = function(grunt) {
         watch: {
             c: {
                 files: ['**/*.c'],
-                tasks: ['exec:gcc','exec:remvocals']
+                tasks: ['exec:gcc','exec:run']
             }
         },
  
         exec: {
             gcc: {
                 cmd: function() {
-                    return 'gcc -Wall -g -o bin/remvocals remvocals.c';
+                    //return 'gcc -Wall -g -o bin/remvocals remvocals.c';
+                    return 'gcc -Wall -g -o bin/addecho addecho.c';
                 }
             },
-            remvocals : {
+            run : {
                cmd: function() {
-                    return './bin/remvocals src-audio/love.wav output/love-no-vocals.wav';
+                    //return './bin/remvocals src-audio/love.wav output/love-no-vocals.wav';
+                    return './bin/addecho';
                 } 
             }
         }
@@ -26,6 +28,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-open');
  
     grunt.registerTask('compile', ['exec:gcc'])
-    grunt.registerTask('run', ['exec:remvocals'])
-    grunt.registerTask('default', ['compile', 'watch']);
+    grunt.registerTask('run', ['exec:run'])
+    grunt.registerTask('default', ['compile','run', 'watch']);
 };
