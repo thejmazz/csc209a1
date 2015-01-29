@@ -58,12 +58,29 @@ int main (int argc, char **argv ) {
 		fwrite(&echo[i], sizeof(short), 1, fp_output);
 	}
 
-	short mix, curr;
-	fread(&curr, sizeof(short), 1, fp_input);
+	
+	/*fread(&curr, sizeof(short), 1, fp_input);
 	printf("%d\n",curr);
 	mix = echo[0] / volume_scale + curr;
 	printf("%d\n",mix);
-	fwrite(&mix, sizeof(short), 1, fp_output);
+	fwrite(&mix, sizeof(short), 1, fp_output);*/
+
+	short mix, curr;
+	i = 0;
+	int j = 1;
+	while(j == 1){
+		if(i == delay){
+			i = 0;
+		}
+
+		j = fread(&curr, sizeof(short), 1, fp_input);
+		mix = echo[i] / volume_scale + curr;
+		echo[i] = curr;
+
+		fwrite(&mix, sizeof(short), 1, fp_output);
+		i++;
+	}
+
 	
 	/*short mix, curr;
 	int j = 1;
