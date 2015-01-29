@@ -17,7 +17,7 @@ module.exports = function(grunt) {
             run : {
                cmd: function() {
                     //return './bin/remvocals src-audio/love.wav output/love-no-vocals.wav';
-                    return './bin/addecho';
+                    return './bin/addecho src-audio/short.wav output/short-echo.wav';
                 } 
             }
         }
