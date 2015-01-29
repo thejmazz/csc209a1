@@ -4,7 +4,6 @@
 int main (int argc, char **argv ) {
 	int delay = 3;
 	int volume_scale = 2;
-	double mult = 1 / volume_scale;
 
 	FILE *fp_input, *fp_output;
 
@@ -48,17 +47,25 @@ int main (int argc, char **argv ) {
 		i++;
 	}*/
 
-	short zero = 0;
+	/*short zero = 0;
 	for(i = 0; i < delay; i++){
 		fwrite(&zero, sizeof(short), 1, fp_output);
-	}
+	}*/
 
-	short *echoSamples = malloc(delay * sizeof(short));
+	short *echo = malloc(delay * sizeof(short));
 	for(i = 0; i < delay; i++){
-		fread(&echoSamples[i], sizeof(short), 1, fp_input);
+		fread(&echo[i], sizeof(short), 1, fp_input);
+		fwrite(&echo[i], sizeof(short), 1, fp_output);
 	}
 
 	short mix, curr;
+	fread(&curr, sizeof(short), 1, fp_input);
+	printf("%d\n",curr);
+	mix = echo[0] / volume_scale + curr;
+	printf("%d\n",mix);
+	fwrite(&mix, sizeof(short), 1, fp_output);
+	
+	/*short mix, curr;
 	int j = 1;
 	i = 0;
 	while(j == 1){
@@ -67,14 +74,14 @@ int main (int argc, char **argv ) {
 		}
 		j = fread(&curr, sizeof(short), 1, fp_input);
 
-		mix = echoSamples[i] * mult + curr;
+		mix = echo[i] * mult + curr;
 		fwrite(&mix, sizeof(short), 1, fp_output);
 		i++;
 	}
 
 	while(i != delay){
-		fwrite(&echoSamples[i], sizeof(short), 1, fp_output);
-	}
+		fwrite(&echo[i], sizeof(short), 1, fp_output);
+	}*/
 
 	return 0;
 }
