@@ -1,73 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 
 int main (int argc, char **argv ) {
-	int delay = 3;
-	int volume_scale = 2;
+	int delay = 8000;
+	int volume_scale = 4;
+	int file_num = 1;
+
+	int option = 0;
+	while ((option = getopt(argc, argv,"d:v:")) != -1) {
+		switch (option) {
+			 case 'd' : {
+				delay = (int)atoi(optarg);
+				file_num = file_num + 2;
+				break;
+			 }
+			 case 'v' : {
+				volume_scale = (int)atoi(optarg);
+				file_num = file_num + 2;
+				break;	
+			 }
+			 default: break;
+		}
+	}
+
+	if ( (file_num == 1 && argc != 3) ||
+		 (file_num == 3 && argc != 5) ||
+		 (file_num == 5 && argc != 7) ) {
+		fprintf(stderr, "Usage: %s [-d delay] [-v volume_scale] sourcewav destwav  \n", argv[0]);
+		return 1;
+	}
 
 	FILE *fp_input, *fp_output;
 
-	fp_input = fopen(argv[1], "rb");
-	fp_output = fopen(argv[2], "wb");
+	fp_input = fopen(argv[file_num], "rb");
+	fp_output = fopen(argv[file_num+1], "wb");
 
-	// Write header to output, short by short
-	short s;
+	#define HEADER_SIZE 22
 	int i;
-	short size;
-	for(i = 0; i < 22; i++){
-		fread(&s, sizeof(short), 1, fp_input);
-		
+	int j;
+	short header[HEADER_SIZE];
+	for(i = 0; i < HEADER_SIZE; i++) {
+		j = fread(&header[i], sizeof(short), 1, fp_input);
+		if(j != 1){
+			printf("premptively reache end of file, exiting\n");
+			return 1;
+		}
+	}
+
+	int size;
+	unsigned int * sizepointer;
+	for(i = 0; i < HEADER_SIZE; i++){
 		if(i == 2 || i == 20){
-			size = s + delay * 2;
-			fwrite(&size, sizeof(short), 1, fp_output);
+			sizepointer = (unsigned int *)(header + i);
+			size = *sizepointer + delay * 2;
+			fwrite(&size, sizeof(int), 1, fp_output);
+			i++;
 		} else {
-			fwrite(&s, sizeof(short), 1, fp_output);
+			fwrite(&header[i], sizeof(short), 1, fp_output);
 		}
-		//fwrite(&s, sizeof(short), 1, fp_output);
 	}
-	
-	// Add delay 0 samples to output
-	/*short zero = 0;
-	for(i = 0; i < delay; i++) {
-		fwrite(&zero, sizeof(short), 1, fp_output);
-	}
-
-	short *echoSamples = malloc(delay * sizeof(short));
-	short new;
-	int j = 1;
-
-	i = 0;
-	while(j == 1) {
-		if(i == delay) {
-			i = 0;
-		}
-		j = fread(&echoSamples[i], sizeof(short), 1, fp_input);
-		new = echoSamples[i] / volume_scale;
-		fwrite(&new, sizeof(short), 1, fp_output);
-		i++;
-	}*/
-
-	/*short zero = 0;
-	for(i = 0; i < delay; i++){
-		fwrite(&zero, sizeof(short), 1, fp_output);
-	}*/
 
 	short *echo = malloc(delay * sizeof(short));
+	if (echo == NULL) {
+		fprintf(stderr, "failed to allocate memory.\n");
+		return 1;
+	}
+	
 	for(i = 0; i < delay; i++){
-		fread(&echo[i], sizeof(short), 1, fp_input);
+		j = fread(&echo[i], sizeof(short), 1, fp_input);
+		if(j != 1){
+			printf("premptively reache end of file, exiting\n");
+			return 1;
+		}
 		fwrite(&echo[i], sizeof(short), 1, fp_output);
 	}
 
-	
-	/*fread(&curr, sizeof(short), 1, fp_input);
-	printf("%d\n",curr);
-	mix = echo[0] / volume_scale + curr;
-	printf("%d\n",mix);
-	fwrite(&mix, sizeof(short), 1, fp_output);*/
-
 	short mix, curr;
 	i = 0;
-	int j = 1;
+	j = 1;
 	while(j == 1){
 		if(i == delay){
 			i = 0;
@@ -77,28 +89,16 @@ int main (int argc, char **argv ) {
 		mix = echo[i] / volume_scale + curr;
 		echo[i] = curr;
 
-		fwrite(&mix, sizeof(short), 1, fp_output);
-		i++;
-	}
-
-	
-	/*short mix, curr;
-	int j = 1;
-	i = 0;
-	while(j == 1){
-		if(i == delay){
-			i = 0;
+		if(j == 1){
+			fwrite(&mix, sizeof(short), 1, fp_output);
+			i++;
 		}
-		j = fread(&curr, sizeof(short), 1, fp_input);
-
-		mix = echo[i] * mult + curr;
-		fwrite(&mix, sizeof(short), 1, fp_output);
-		i++;
 	}
 
-	while(i != delay){
+	for(i = 0; i < delay; i++){
+		echo[i] = echo[i] / volume_scale;
 		fwrite(&echo[i], sizeof(short), 1, fp_output);
-	}*/
+	}
 
 	return 0;
 }
